@@ -68,7 +68,7 @@ const NavigationBar = () => {
                     <ListItemText primary={item.text} />
                   </ListItem>
                 ))}
-                <ListItem button component={Link} to="/login">
+                <ListItem button component={Link} to="/signin">
                   <ListItemText primary="Login" />
                   <IconButton color="inherit">
                     <AccountCircle />

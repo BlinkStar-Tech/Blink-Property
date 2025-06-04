@@ -34,6 +34,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     margin: theme.spacing(1),
     padding: theme.spacing(1.5),
+    maxHeight: '95vh',
+    overflowY: 'auto',
   },
 }));
 
@@ -44,9 +46,9 @@ const SignInContainer = styled(Container)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "center",
   padding: 0,
-  overflow: 'auto',
   [theme.breakpoints.down('sm')]: {
     alignItems: "flex-start",
+    paddingTop: theme.spacing(1),
   },
 }));
 
@@ -54,9 +56,21 @@ const SignInContainer = styled(Container)(({ theme }) => ({
 const FormFields = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(1),
+  gap: theme.spacing(1.5),
   marginTop: theme.spacing(1),
   marginBottom: theme.spacing(1),
+  width: '100%',
+}));
+
+// Styled button
+const StyledButton = styled(Button)(({ theme }) => ({
+  padding: theme.spacing(1.5),
+  marginTop: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+  fontWeight: 600,
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1),
+  },
 }));
 
 // Styled social buttons container
@@ -259,35 +273,36 @@ export default function SignIn() {
                 disabled={loading}
               />
             </StyledFormControl>
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" disabled={loading} size="small" />}
-              label={<Typography variant="body2">Remember me</Typography>}
-            />
-            <Button
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <FormControlLabel
+                control={<Checkbox value="remember" color="primary" disabled={loading} size="small" />}
+                label={<Typography variant="body2">Remember me</Typography>}
+              />
+              <Link
+                component="button"
+                type="button"
+                onClick={handleClickOpen}
+                variant="body2"
+                sx={{
+                  textDecoration: "none",
+                  "&:hover": {
+                    textDecoration: "underline"
+                  }
+                }}
+                disabled={loading}
+              >
+                Forgot password?
+              </Link>
+            </Box>
+            <StyledButton
               type="submit"
               fullWidth
               variant="contained"
-              size="medium"
+              size="large"
               disabled={loading}
             >
-              {loading ? <CircularProgress size={20} /> : "Sign in"}
-            </Button>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{
-                alignSelf: "center",
-                textDecoration: "none",
-                "&:hover": {
-                  textDecoration: "underline"
-                }
-              }}
-              disabled={loading}
-            >
-              Forgot your password?
-            </Link>
+              {loading ? <CircularProgress size={24} /> : "Sign in"}
+            </StyledButton>
           </FormFields>
           
           <Divider sx={{ my: 1 }}>or</Divider>

@@ -31,19 +31,21 @@ const Card = styled(MuiCard)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
     margin: theme.spacing(1),
     padding: theme.spacing(1.5),
+    maxHeight: '95vh',
+    overflowY: 'auto',
   },
 }));
 
 // Styled container for the sign-up layout
 const SignUpContainer = styled(Container)(({ theme }) => ({
-  minHeight: '100dvh', // Use dynamic viewport height
+  minHeight: '100dvh',
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   padding: 0,
-  overflow: 'auto', // Enable scrolling if needed
   [theme.breakpoints.down('sm')]: {
-    alignItems: "flex-start", // Align to top on mobile
+    alignItems: "flex-start",
+    paddingTop: theme.spacing(1),
   },
 }));
 
@@ -51,9 +53,21 @@ const SignUpContainer = styled(Container)(({ theme }) => ({
 const FormFields = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(1),
+  gap: theme.spacing(1.5),
   marginTop: theme.spacing(1),
   marginBottom: theme.spacing(1),
+  width: '100%',
+}));
+
+// Styled button
+const StyledButton = styled(Button)(({ theme }) => ({
+  padding: theme.spacing(1.5),
+  marginTop: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+  fontWeight: 600,
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1),
+  },
 }));
 
 // Styled social buttons container
@@ -297,15 +311,15 @@ export default function SignUp() {
                 disabled={loading}
               />
             </StyledFormControl>
-            <Button
+            <StyledButton
               type="submit"
               fullWidth
               variant="contained"
-              size="medium"
+              size="large"
               disabled={loading}
             >
-              {loading ? <CircularProgress size={20} /> : "Sign up"}
-            </Button>
+              {loading ? <CircularProgress size={24} /> : "Sign up"}
+            </StyledButton>
           </FormFields>
           
           <Divider sx={{ my: 1 }}>or</Divider>
@@ -341,7 +355,7 @@ export default function SignUp() {
               Already have an account?{" "}
               <Link 
                 href="/signin" 
-                variant="body2" 
+                variant="body2"
                 sx={{ 
                   fontWeight: 500,
                   textDecoration: "none",
