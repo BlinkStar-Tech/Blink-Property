@@ -12,9 +12,13 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
+import CircularProgress from "@mui/material/CircularProgress";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { styled } from "@mui/material/styles";
 import ForgotPassword from "./ForgotPassword";
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from "./CustomIcons";
+import { useAuth } from "../../context/AuthContext";
 
 // Styled Card component for sign-in form
 const Card = styled(MuiCard)({
@@ -37,11 +41,14 @@ const SignInContainer = styled(Stack)({
 });
 
 export default function SignIn() {
+  const { login } = useAuth();
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [alert, setAlert] = React.useState({ open: false, message: "", severity: "success" });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -51,16 +58,60 @@ export default function SignIn() {
     setOpen(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleAlertClose = () => {
+    setAlert({ ...alert, open: false });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     if (emailError || passwordError) {
-      event.preventDefault();
       return;
     }
+
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    const email = data.get("email");
+    const password = data.get("password");
+
+    if (!validateInputs()) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Login failed");
+      }
+
+      // Use the login function from AuthContext
+      login(result.user, result.token);
+
+      setAlert({
+        open: true,
+        message: "Login successful!",
+        severity: "success",
+      });
+
+      // Redirect to dashboard
+      window.location.href = "/dashboard";
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: error.message || "Login failed",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const validateInputs = () => {
@@ -88,6 +139,16 @@ export default function SignIn() {
     }
 
     return isValid;
+  };
+
+  const handleGoogleSignIn = async () => {
+    // Implement Google Sign In
+    window.location.href = "http://localhost:5000/api/auth/google";
+  };
+
+  const handleFacebookSignIn = async () => {
+    // Implement Facebook Sign In
+    window.location.href = "http://localhost:5000/api/auth/facebook";
   };
 
   return (
@@ -134,6 +195,7 @@ export default function SignIn() {
                 fullWidth
                 variant="outlined"
                 color={emailError ? "error" : "primary"}
+                disabled={loading}
               />
             </FormControl>
             <FormControl>
@@ -150,20 +212,21 @@ export default function SignIn() {
                 fullWidth
                 variant="outlined"
                 color={passwordError ? "error" : "primary"}
+                disabled={loading}
               />
             </FormControl>
-            {/* <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
+            <FormControlLabel
+              control={<Checkbox value="remember" color="primary" disabled={loading} />}
               label="Remember me"
-            /> */}
+            />
             <ForgotPassword open={open} handleClose={handleClose} />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
+              disabled={loading}
             >
-              Sign in
+              {loading ? <CircularProgress size={24} /> : "Sign in"}
             </Button>
             <Link
               component="button"
@@ -171,6 +234,7 @@ export default function SignIn() {
               onClick={handleClickOpen}
               variant="body2"
               sx={{ alignSelf: "center" }}
+              disabled={loading}
             >
               Forgot your password?
             </Link>
@@ -180,8 +244,9 @@ export default function SignIn() {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert("Sign in with Google")}
+              onClick={handleGoogleSignIn}
               startIcon={<GoogleIcon />}
+              disabled={loading}
             >
               Sign in with Google
             </Button>
@@ -189,8 +254,9 @@ export default function SignIn() {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert("Sign in with Facebook")}
+              onClick={handleFacebookSignIn}
               startIcon={<FacebookIcon />}
+              disabled={loading}
             >
               Sign in with Facebook
             </Button>
@@ -203,6 +269,16 @@ export default function SignIn() {
           </Box>
         </Card>
       </SignInContainer>
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={6000}
+        onClose={handleAlertClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleAlertClose} severity={alert.severity}>
+          {alert.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

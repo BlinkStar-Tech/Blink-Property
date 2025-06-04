@@ -1,9 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
 import CssBaseline from "@mui/material/CssBaseline";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
@@ -12,224 +10,367 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
+import CircularProgress from "@mui/material/CircularProgress";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import Container from "@mui/material/Container";
 import { styled } from "@mui/material/styles";
-import InputAdornment from "@mui/material/InputAdornment";
-import IconButton from "@mui/material/IconButton";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { GoogleIcon, FacebookIcon } from "./CustomIcons";
+import { useAuth } from "../../context/AuthContext";
 
 // Styled Card component for sign-up form
-const Card = styled(MuiCard)({
+const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignSelf: "center",
   width: "100%",
-  padding: "24px",
-  gap: "5px",
+  padding: theme.spacing(2),
+  gap: theme.spacing(0.5),
   margin: "auto",
-  maxWidth: "450px",
-});
+  maxWidth: "400px",
+  boxShadow: "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1.5),
+    maxWidth: "100%",
+  },
+}));
 
 // Styled container for the sign-up layout
-const SignUpContainer = styled(Stack)({
+const SignUpContainer = styled(Container)(({ theme }) => ({
   height: "100vh",
-  padding: "16px",
-});
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: theme.spacing(2),
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1),
+  },
+}));
+
+// Styled form fields container
+const FormFields = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(1),
+  marginTop: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+}));
+
+// Styled social buttons container
+const SocialButtons = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(1),
+  marginTop: theme.spacing(1),
+}));
+
+// Styled heading
+const StyledHeading = styled(Typography)(({ theme }) => ({
+  fontSize: "1.5rem",
+  fontWeight: 600,
+  marginBottom: theme.spacing(0.5),
+  [theme.breakpoints.down('sm')]: {
+    fontSize: "1.25rem",
+  },
+}));
+
+// Styled brand name
+const BrandName = styled(Typography)(({ theme }) => ({
+  fontSize: "1rem",
+  fontWeight: 500,
+  color: theme.palette.primary.main,
+  marginBottom: theme.spacing(0.5),
+}));
+
+// Styled form control for more compact layout
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  '& .MuiFormLabel-root': {
+    marginBottom: theme.spacing(0.5),
+  },
+  '& .MuiInputBase-root': {
+    marginBottom: theme.spacing(0.5),
+  },
+}));
 
 export default function SignUp() {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = React.useState(false);
-  const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] =
-    React.useState("");
+  const { login } = useAuth();
+  const [formErrors, setFormErrors] = React.useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [loading, setLoading] = React.useState(false);
+  const [alert, setAlert] = React.useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const handleAlertClose = () => {
+    setAlert({ ...alert, open: false });
+  };
 
-  // Create refs for input fields
-  const nameRef = React.useRef();
-  const emailRef = React.useRef();
-  const passwordRef = React.useRef();
-  const confirmPasswordRef = React.useRef();
+  const validateInputs = (data) => {
+    const errors = {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    };
+    let isValid = true;
 
-  const handleSubmit = (event) => {
+    // Validate name
+    if (!data.name || data.name.trim().length < 2) {
+      errors.name = "Name must be at least 2 characters long";
+      isValid = false;
+    }
+
+    // Validate email
+    if (!data.email || !/\S+@\S+\.\S+/.test(data.email)) {
+      errors.email = "Please enter a valid email address";
+      isValid = false;
+    }
+
+    // Validate password
+    if (!data.password || data.password.length < 6) {
+      errors.password = "Password must be at least 6 characters long";
+      isValid = false;
+    }
+
+    // Validate confirm password
+    if (data.password !== data.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (validateInputs()) {
-      console.log({
-        name: nameRef.current.value,
-        email: emailRef.current.value,
-        password: passwordRef.current.value,
+    const formData = new FormData(event.currentTarget);
+    const data = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+      confirmPassword: formData.get("confirmPassword"),
+    };
+
+    if (!validateInputs(data)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }),
       });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Registration failed");
+      }
+
+      // Use the login function from AuthContext
+      login(result.user, result.token);
+
+      setAlert({
+        open: true,
+        message: "Registration successful! Redirecting...",
+        severity: "success",
+      });
+
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 2000);
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: error.message || "Registration failed",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const validateInputs = () => {
-    let isValid = true;
+  const handleGoogleSignUp = async () => {
+    window.location.href = "http://localhost:5000/api/auth/google";
+  };
 
-    // Email validation
-    if (
-      !emailRef.current.value ||
-      !/\S+@\S+\.\S+/.test(emailRef.current.value)
-    ) {
-      setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage("");
-    }
-
-    // Password validation
-    if (!passwordRef.current.value || passwordRef.current.value.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-    }
-
-    // Confirm password validation
-    if (passwordRef.current.value !== confirmPasswordRef.current.value) {
-      setConfirmPasswordError(true);
-      setConfirmPasswordErrorMessage("Passwords do not match.");
-      isValid = false;
-    } else {
-      setConfirmPasswordError(false);
-      setConfirmPasswordErrorMessage("");
-    }
-
-    return isValid;
+  const handleFacebookSignUp = async () => {
+    window.location.href = "http://localhost:5000/api/auth/facebook";
   };
 
   return (
     <>
       <CssBaseline />
-      <SignUpContainer direction="column" justifyContent="center">
+      <SignUpContainer maxWidth="sm">
         <Card variant="outlined">
-          <h3>BlinkStar Properties</h3>
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{
-              width: "100%",
-              fontSize: { xs: "1rem", md: "2rem" },
-              marginTop: "-5px",
-            }}
-          >
-            Sign Up
-          </Typography>
-          <Box
+          <BrandName variant="h6">BlinkStar Properties</BrandName>
+          <StyledHeading variant="h1">
+            Create Account
+          </StyledHeading>
+          <FormFields
             component="form"
             onSubmit={handleSubmit}
             noValidate
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              gap: 1,
-            }}
           >
-            <FormControl>
-              <FormLabel htmlFor="name">Name</FormLabel>
+            <StyledFormControl>
+              <FormLabel htmlFor="name">Full Name</FormLabel>
               <TextField
-                inputRef={nameRef}
+                error={!!formErrors.name}
+                helperText={formErrors.name}
                 id="name"
                 name="name"
-                placeholder="Your Name"
+                type="text"
+                placeholder="John Doe"
+                autoComplete="name"
+                autoFocus
                 required
                 fullWidth
+                size="small"
                 variant="outlined"
+                disabled={loading}
               />
-            </FormControl>
-            <FormControl>
+            </StyledFormControl>
+            <StyledFormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
-                inputRef={emailRef}
+                error={!!formErrors.email}
+                helperText={formErrors.email}
                 id="email"
-                type="email"
                 name="email"
+                type="email"
                 placeholder="your@email.com"
                 autoComplete="email"
                 required
                 fullWidth
+                size="small"
                 variant="outlined"
+                disabled={loading}
               />
-            </FormControl>
-            <FormControl>
+            </StyledFormControl>
+            <StyledFormControl>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                inputRef={passwordRef}
-                name="password"
-                placeholder="••••••"
-                type={showPassword ? "text" : "password"}
+                error={!!formErrors.password}
+                helperText={formErrors.password}
                 id="password"
-                autoComplete="current-password"
-                required
-                fullWidth
-                variant="outlined"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </FormControl>
-            {/* <FormControl>
-              <FormLabel htmlFor="confirm-password">Confirm Password</FormLabel>
-              <TextField
-                error={confirmPasswordError}
-                helperText={confirmPasswordErrorMessage}
-                inputRef={confirmPasswordRef}
-                name="confirm-password"
+                name="password"
+                type="password"
                 placeholder="••••••"
-                type={showConfirmPassword ? "text" : "password"}
-                id="confirm-password"
+                autoComplete="new-password"
                 required
                 fullWidth
+                size="small"
                 variant="outlined"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowConfirmPassword((prev) => !prev)}
-                        edge="end"
-                      >
-                        {showConfirmPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
+                disabled={loading}
               />
-            </FormControl> */}
-            <Button type="submit" fullWidth variant="contained">
-              Sign Up
+            </StyledFormControl>
+            <StyledFormControl>
+              <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+              <TextField
+                error={!!formErrors.confirmPassword}
+                helperText={formErrors.confirmPassword}
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder="••••••"
+                autoComplete="new-password"
+                required
+                fullWidth
+                size="small"
+                variant="outlined"
+                disabled={loading}
+              />
+            </StyledFormControl>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="medium"
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={20} /> : "Sign up"}
             </Button>
-            <Typography sx={{ textAlign: "center" }}>
+          </FormFields>
+          
+          <Divider sx={{ my: 1 }}>or</Divider>
+          
+          <SocialButtons>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleGoogleSignUp}
+              startIcon={<GoogleIcon />}
+              disabled={loading}
+              size="medium"
+            >
+              Sign up with Google
+            </Button>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleFacebookSignUp}
+              startIcon={<FacebookIcon />}
+              disabled={loading}
+              size="medium"
+            >
+              Sign up with Facebook
+            </Button>
+            <Typography 
+              variant="body2"
+              sx={{ 
+                textAlign: "center", 
+                mt: 1
+              }}
+            >
               Already have an account?{" "}
-              <Link href="/signin" variant="body2" sx={{ alignSelf: "center" }}>
+              <Link 
+                href="/signin" 
+                variant="body2" 
+                sx={{ 
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  "&:hover": {
+                    textDecoration: "underline"
+                  }
+                }}
+              >
                 Sign in
               </Link>
             </Typography>
-          </Box>
+          </SocialButtons>
         </Card>
       </SignUpContainer>
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={6000}
+        onClose={handleAlertClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert 
+          onClose={handleAlertClose} 
+          severity={alert.severity}
+          variant="filled"
+          elevation={6}
+        >
+          {alert.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
