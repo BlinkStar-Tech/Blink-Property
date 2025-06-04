@@ -25,13 +25,11 @@ const Card = styled(MuiCard)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(2),
   gap: theme.spacing(0.5),
-  margin: theme.spacing(2),
   maxWidth: "400px",
   boxShadow: "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
   [theme.breakpoints.down('sm')]: {
-    margin: theme.spacing(1),
     padding: theme.spacing(1.5),
-    maxHeight: '95vh',
+    maxHeight: 'calc(100vh - 32px)', // Account for container padding
     overflowY: 'auto',
   },
 }));
@@ -42,10 +40,9 @@ const SignUpContainer = styled(Container)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  padding: 0,
+  padding: theme.spacing(2),
   [theme.breakpoints.down('sm')]: {
-    alignItems: "flex-start",
-    paddingTop: theme.spacing(1),
+    padding: theme.spacing(2),
   },
 }));
 
@@ -229,9 +226,14 @@ export default function SignUp() {
   };
 
   return (
-    <>
+    <Box sx={{ 
+      minHeight: '100dvh',
+      display: 'flex',
+      flexDirection: 'column',
+      bgcolor: (theme) => theme.palette.background.default
+    }}>
       <CssBaseline />
-      <SignUpContainer maxWidth="sm" disableGutters>
+      <SignUpContainer maxWidth="sm">
         <Card variant="outlined">
           <BrandName variant="h6">BlinkStar Properties</BrandName>
           <StyledHeading variant="h1">
@@ -392,6 +394,6 @@ export default function SignUp() {
           {alert.message}
         </Alert>
       </Snackbar>
-    </>
+    </Box>
   );
 }

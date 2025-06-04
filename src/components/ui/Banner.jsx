@@ -1,140 +1,164 @@
 import React, { useState, useEffect } from "react";
-import bannerImage from "../../img/banner.jpg"; 
+import {
+Box,
+Typography,
+Container,
+TextField,
+Button,
+InputAdornment,
+Paper,
+Autocomplete,
+Stack
+} from '@mui/material';
+import { Search as SearchIcon, LocationOn } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
+import bannerimage from '../../img/banner2.jpg';
 
-const Banner = () => {
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 768);
+const BannerContainer = styled(Box)(({ theme }) => ({
+position: 'relative',
+height: '80vh',
+display: 'flex',
+alignItems: 'center',
+backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${bannerimage})`,
+backgroundSize: 'cover',
+backgroundPosition: 'center',
+color: 'white',
+[theme.breakpoints.down('sm')]: {
+height: '70vh',
+},
+}));
 
-  const handleResize = () => {
-    setIsSmallScreen(window.innerWidth <= 768);
-  };
+const SearchContainer = styled(Paper)(({ theme }) => ({
+padding: theme.spacing(3),
+borderRadius: theme.spacing(2),
+backgroundColor: 'rgba(255, 255, 255, 0.68)',
+backdropFilter: 'blur(5px)',
+maxWidth: '800px',
+width: '100%',
+margin: '0 auto',
+marginTop: theme.spacing(4),
+[theme.breakpoints.down('sm')]: {
+padding: theme.spacing(2),
+},
+}));
 
-  useEffect(() => {
-    // Initial check
-    handleResize();
-    
-    // Add resize event listener
-    window.addEventListener('resize', handleResize);
+const locations = [
+"Harare",
+"Bulawayo",
+"Mutare",
+"Gweru",
+"Masvingo",
+"Victoria Falls",
+];
 
-    // Cleanup on unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+const propertyTypes = [
+"House",
+"Apartment",
+"Condo",
+"Townhouse",
+"Villa",
+"Land"
+];
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: isSmallScreen ? "column" : "row",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-        padding: isSmallScreen ? "20px" : "40px 60px",
-        color: "white",
-        backgroundImage: `url(${bannerImage})`,
-        height: isSmallScreen ? "50vh" : "70vh",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        position: "relative",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "rgba(0, 0, 0, 0.6)",
-          padding: isSmallScreen ? "20px" : "30px",
-          borderRadius: "10px",
-          width: isSmallScreen ? "100%" : "50%",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: isSmallScreen ? "1.8rem" : "2.5rem",
-            marginBottom: "10px",
+export default function Banner() {
+const [location, setLocation] = useState(null);
+const [propertyType, setPropertyType] = useState(null);
+const [priceRange, setPriceRange] = useState('');
+
+return (
+<BannerContainer>
+<Container maxWidth="lg">
+<Box textAlign="center" mb={4}>
+<Typography
+variant="h2"
+component="h1"
+sx={{
+fontWeight: 700,
+mb: 2,
+fontSize: { xs: '2.5rem', md: '3.5rem' },
+}}
+>
+Find Your Dream Home
+</Typography>
+<Typography
+variant="h5"
+sx={{
+mb: 4,
+fontSize: { xs: '1.2rem', md: '1.5rem' },
+fontWeight: 400,
+}}
+>
+Discover the perfect property in your favorite location
+</Typography>
+</Box>
+    <SearchContainer elevation={3}>
+      <Stack spacing={2}>
+        <Box
+          sx={{
+            display: 'grid',
+            gap: 2,
+            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr auto' },
           }}
         >
-          Your Dream Home Awaits
-        </h1>
-        <p
-          style={{
-            fontSize: isSmallScreen ? "0.9rem" : "1.1rem",
-            marginBottom: "20px",
-          }}
-        >
-          Discover amazing properties for sale and rent.
-        </p>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: isSmallScreen ? "column" : "row",
-            gap: "10px",
-            justifyContent: "center",
-          }}
-        >
-          <input
-            type="text"
-            placeholder="Enter location..."
-            style={{
-              padding: "10px",
-              fontSize: "1rem",
-              borderRadius: "5px",
-              border: "none",
-              width: isSmallScreen ? "100%" : "auto",
-              flex: "1",
-            }}
+          <Autocomplete
+            value={location}
+            onChange={(event, newValue) => setLocation(newValue)}
+            options={locations}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Location"
+                variant="outlined"
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocationOn />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            )}
           />
-          <select
-            style={{
-              padding: "10px",
-              fontSize: "1rem",
-              borderRadius: "5px",
-              border: "none",
-              width: isSmallScreen ? "100%" : "auto",
-            }}
-          >
-            <option value="">Select Property Type</option>
-            <option value="house">House</option>
-            <option value="apartment">Apartment</option>
-            <option value="condo">Condo</option>
-          </select>
-          <button
-            style={{
-              padding: "10px 15px",
-              fontSize: "1rem",
-              backgroundColor: "#4F959D",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              flex: "1",
+
+          <Autocomplete
+            value={propertyType}
+            onChange={(event, newValue) => setPropertyType(newValue)}
+            options={propertyTypes}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Property Type"
+                variant="outlined"
+              />
+            )}
+          />
+
+          <TextField
+            label="Price Range"
+            variant="outlined"
+            value={priceRange}
+            onChange={(e) => setPriceRange(e.target.value)}
+            placeholder="Max Price"
+            type="number"
+          />
+
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<SearchIcon />}
+            sx={{
+              height: '56px',
+              fontSize: '1.1rem',
+              px: 4,
             }}
           >
             Search
-          </button>
-        </div>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20px",
-          right: "20px",
-        }}
-      >
-        <button
-          style={{
-            padding: "10px 20px",
-            fontSize: "1rem",
-            backgroundColor: "#FF6347",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Get Started
-        </button>
-      </div>
-    </div>
-  );
-};
-
-export default Banner;
+          </Button>
+        </Box>
+      </Stack>
+    </SearchContainer>
+  </Container>
+</BannerContainer>
+);
+}
