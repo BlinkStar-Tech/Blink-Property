@@ -22,28 +22,28 @@ import { useAuth } from "../../context/AuthContext";
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  alignSelf: "center",
   width: "100%",
   padding: theme.spacing(2),
   gap: theme.spacing(0.5),
-  margin: "auto",
+  margin: theme.spacing(2),
   maxWidth: "400px",
   boxShadow: "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
   [theme.breakpoints.down('sm')]: {
+    margin: theme.spacing(1),
     padding: theme.spacing(1.5),
-    maxWidth: "100%",
   },
 }));
 
 // Styled container for the sign-up layout
 const SignUpContainer = styled(Container)(({ theme }) => ({
-  height: "100vh",
+  minHeight: '100dvh', // Use dynamic viewport height
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  padding: theme.spacing(2),
+  padding: 0,
+  overflow: 'auto', // Enable scrolling if needed
   [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(1),
+    alignItems: "flex-start", // Align to top on mobile
   },
 }));
 
@@ -217,7 +217,7 @@ export default function SignUp() {
   return (
     <>
       <CssBaseline />
-      <SignUpContainer maxWidth="sm">
+      <SignUpContainer maxWidth="sm" disableGutters>
         <Card variant="outlined">
           <BrandName variant="h6">BlinkStar Properties</BrandName>
           <StyledHeading variant="h1">
@@ -360,7 +360,14 @@ export default function SignUp() {
         open={alert.open}
         autoHideDuration={6000}
         onClose={handleAlertClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ 
+          vertical: "top", 
+          horizontal: "center" 
+        }}
+        sx={{
+          position: 'fixed',
+          top: { xs: 0, sm: 24 }
+        }}
       >
         <Alert 
           onClose={handleAlertClose} 
