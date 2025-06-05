@@ -20,6 +20,8 @@ const StyledCard = styled(Card)(({ theme }) => ({
   height: '100%',
   textAlign: 'center',
   transition: 'transform 0.3s ease-in-out',
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius * 2,
   '&:hover': {
     transform: 'translateY(-8px)',
   },
@@ -31,6 +33,11 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   margin: '0 auto',
   marginBottom: theme.spacing(2),
   backgroundColor: theme.palette.primary.main,
+  boxShadow: `0 3px 10px ${theme.palette.primary.main}40`,
+  [theme.breakpoints.down('sm')]: {
+    width: 56,
+    height: 56,
+  },
 }));
 
 const features = [
@@ -58,16 +65,37 @@ const features = [
 
 export default function WhyChooseUs() {
   return (
-    <Box sx={{ py: 8, backgroundColor: 'grey.50' }}>
-      <Container maxWidth="lg">
-        <Box sx={{ mb: 6, textAlign: 'center' }}>
+    <Box 
+      sx={{ 
+        py: { xs: 4, sm: 6, md: 8 },
+        backgroundColor: 'grey.50',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}
+    >
+      <Container 
+        maxWidth="lg"
+        sx={{
+          px: { xs: 2, sm: 3, md: 4 }
+        }}
+      >
+        <Box 
+          sx={{ 
+            mb: { xs: 4, sm: 5, md: 6 },
+            textAlign: 'center',
+            maxWidth: '800px',
+            mx: 'auto'
+          }}
+        >
           <Typography
             variant="h3"
             component="h2"
             sx={{
               mb: 2,
               fontWeight: 700,
-              fontSize: { xs: '2rem', md: '2.5rem' },
+              fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
+              color: 'text.primary'
             }}
           >
             Why Choose Us
@@ -76,40 +104,78 @@ export default function WhyChooseUs() {
             variant="h6"
             color="text.secondary"
             sx={{
-              mb: 4,
+              mb: { xs: 3, sm: 4 },
+              fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
+              px: { xs: 2, sm: 0 },
               maxWidth: '600px',
-              mx: 'auto',
-              fontSize: { xs: '1rem', md: '1.25rem' },
+              mx: 'auto'
             }}
           >
             We provide the best service in the real estate industry
           </Typography>
         </Box>
 
-        <Grid container spacing={4}>
+        <Grid 
+          container 
+          spacing={{ xs: 2, sm: 3, md: 4 }}
+          justifyContent="center"
+          alignItems="stretch"
+        >
           {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <StyledCard elevation={2}>
-                <CardContent>
-                  <StyledAvatar>
-                    {feature.icon}
-                  </StyledAvatar>
-                  <Typography
-                    variant="h6"
-                    component="h3"
-                    gutterBottom
-                    sx={{ fontWeight: 600 }}
+            <Grid 
+              item 
+              xs={12} 
+              sm={6} 
+              md={3} 
+              key={index}
+              sx={{
+                display: 'flex',
+                justifyContent: 'center'
+              }}
+            >
+              <Box 
+                sx={{ 
+                  width: '100%',
+                  maxWidth: { xs: '340px', sm: '100%' }
+                }}
+              >
+                <StyledCard elevation={2}>
+                  <CardContent 
+                    sx={{ 
+                      p: { xs: 2.5, sm: 3 },
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: { xs: 1, sm: 1.5, md: 2 }
+                    }}
                   >
-                    {feature.title}
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                  >
-                    {feature.description}
-                  </Typography>
-                </CardContent>
-              </StyledCard>
+                    <StyledAvatar>
+                      {feature.icon}
+                    </StyledAvatar>
+                    <Typography
+                      variant="h6"
+                      component="h3"
+                      sx={{ 
+                        fontWeight: 600,
+                        fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                        mb: { xs: 0.5, sm: 1 }
+                      }}
+                    >
+                      {feature.title}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      color="text.secondary"
+                      sx={{
+                        fontSize: { xs: '0.875rem', sm: '1rem' },
+                        lineHeight: 1.6
+                      }}
+                    >
+                      {feature.description}
+                    </Typography>
+                  </CardContent>
+                </StyledCard>
+              </Box>
             </Grid>
           ))}
         </Grid>

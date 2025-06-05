@@ -90,7 +90,7 @@ export default function PropertyCard({ property }) {
           )}
         </FavoriteButton>
         <PropertyImage
-          image={property.image}
+          image={property.imageUrl}
           title={property.title}
         />
       </Box>

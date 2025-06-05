@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Box } from "@mui/material";
 import PropertyCard from "./components/property/PropertyCard";
 import Home from "./components/ui/Home";
 import SignIn from "./components/sign/SignIn";
@@ -11,7 +12,13 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div style={{ flex: "1 0 auto" }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100vh',
+          }}
+        >
           <Routes>
             <Route path="/" element={<Home />} />
             <Route
@@ -33,7 +40,7 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
           </Routes>
-        </div>
+        </Box>
       </Router>
     </AuthProvider>
   );
