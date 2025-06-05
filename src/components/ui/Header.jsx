@@ -55,7 +55,7 @@ const NavigationBar = () => {
         >
           BlinkStar Properties
         </Typography>
-
+        
         {isMobile ? (
           <>
             <IconButton edge="end" color="inherit" onClick={toggleDrawer(true)}>
@@ -90,24 +90,17 @@ const NavigationBar = () => {
                 {item.text}
               </Button>
             ))}
+            <div style={{ marginLeft: '100px' }} />
+            <Button component={Link} to="/add-listing" variant="contained" color="primary" sx={{ marginLeft: '10px' }}>
+              Add Listing
+            </Button>
+            <Tooltip title="Login" arrow>
+              <IconButton component={Link} to="/SignIn" color="inherit" sx={{ marginLeft: '10px' }}>
+                <AccountCircle />
+              </IconButton>
+            </Tooltip>
           </>
         )}
-
-        <Button
-          component={Link}
-          to="/dashboard"
-          variant="contained"
-          color="primary"
-          sx={{ marginLeft: '10px' }}
-        >
-          Add Listing
-        </Button>
-        
-        <Tooltip title="Login" arrow>
-          <IconButton component={Link} to="/signin" color="inherit" sx={{ marginLeft: '10px' }}>
-            <AccountCircle />
-          </IconButton>
-        </Tooltip>
       </Toolbar>
     </AppBar>
   );
