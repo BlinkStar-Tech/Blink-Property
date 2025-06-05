@@ -5,8 +5,10 @@ import Home from "./components/ui/Home";
 import SignIn from "./components/sign/SignIn";
 import SignUp from "./components/sign/SignUp";
 import Dashboard from "./components/dashboard/Dashboard";
+import Profile from "./components/dashboard/Profile";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import { AuthProvider } from "./context/AuthContext";
+
 
 function App() {
   return (
@@ -26,6 +28,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
                 </PrivateRoute>
               }
             />

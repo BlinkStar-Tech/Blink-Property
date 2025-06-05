@@ -91,7 +91,7 @@ const NavigationBar = () => {
               </Button>
             ))}
             <div style={{ marginLeft: '100px' }} />
-            <Button component={Link} to="/add-listing" variant="contained" color="primary" sx={{ marginLeft: '10px' }}>
+            <Button component={Link} to="/dashboard" variant="contained" color="primary" sx={{ marginLeft: '10px' }}>
               Add Listing
             </Button>
             <Tooltip title="Login" arrow>
