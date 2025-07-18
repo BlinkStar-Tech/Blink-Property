@@ -51,7 +51,7 @@ const VisuallyHiddenInput = styled('input')({
 
 export default function Profile() {
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -65,6 +65,11 @@ export default function Profile() {
     message: '',
     severity: 'success',
   });
+
+  const handleEdit = () => {
+    setEditing(true);
+    setAlert({ ...alert, open: false }); // Clear any previous success/error messages
+  };
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -95,7 +100,7 @@ export default function Profile() {
         message: 'Profile updated successfully!',
         severity: 'success',
       });
-      setIsEditing(false);
+      setEditing(false);
     } catch (error) {
       setAlert({
         open: true,
@@ -124,7 +129,7 @@ export default function Profile() {
             >
               {!profileImage && !user?.photoURL && formData.name?.[0]}
             </StyledAvatar>
-            {isEditing && (
+            {editing && (
               <IconButton
                 color="primary"
                 aria-label="upload picture"
@@ -157,7 +162,7 @@ export default function Profile() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  disabled={!isEditing}
+                  disabled={!editing}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -167,7 +172,7 @@ export default function Profile() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  disabled={!isEditing}
+                  disabled={!editing}
                   type="email"
                 />
               </Grid>
@@ -178,7 +183,7 @@ export default function Profile() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  disabled={!isEditing}
+                  disabled={!editing}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -188,7 +193,7 @@ export default function Profile() {
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  disabled={!isEditing}
+                  disabled={!editing}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -198,7 +203,7 @@ export default function Profile() {
                   name="bio"
                   value={formData.bio}
                   onChange={handleInputChange}
-                  disabled={!isEditing}
+                  disabled={!editing}
                   multiline
                   rows={4}
                 />
@@ -206,11 +211,11 @@ export default function Profile() {
             </Grid>
 
             <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', gap: 2 }}>
-              {!isEditing ? (
+              {!editing ? (
                 <Button
                   variant="contained"
                   startIcon={<EditIcon />}
-                  onClick={() => setIsEditing(true)}
+                  onClick={handleEdit}
                 >
                   Edit Profile
                 </Button>
@@ -228,7 +233,7 @@ export default function Profile() {
                     variant="outlined"
                     color="error"
                     startIcon={<CancelIcon />}
-                    onClick={() => setIsEditing(false)}
+                    onClick={() => setEditing(false)}
                   >
                     Cancel
                   </Button>

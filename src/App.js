@@ -8,6 +8,9 @@ import Dashboard from "./components/dashboard/Dashboard";
 import Profile from "./components/dashboard/Profile";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import { AuthProvider } from "./context/AuthContext";
+import Properties from "./components/ui/Properties";
+import PropertyDetail from "./components/property/PropertyDetail";
+import PropertyForm from "./components/property/PropertyForm";
 
 
 function App() {
@@ -16,9 +19,9 @@ function App() {
       <Router>
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: '100vh',
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100vh",
           }}
         >
           <Routes>
@@ -44,6 +47,38 @@ function App() {
               element={
                 <PrivateRoute>
                   <PropertyCard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/properties"
+              element={
+                <PrivateRoute>
+                  <Properties />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/property/:id"
+              element={
+                <PrivateRoute>
+                  <PropertyDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/property/add"
+              element={
+                <PrivateRoute>
+                  <PropertyForm />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/property/edit/:id"
+              element={
+                <PrivateRoute>
+                  <PropertyForm />
                 </PrivateRoute>
               }
             />

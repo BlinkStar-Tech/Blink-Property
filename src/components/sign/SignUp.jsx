@@ -8,7 +8,7 @@ import FormControl from "@mui/material/FormControl";
 import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
+// import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import CircularProgress from "@mui/material/CircularProgress";
 import Snackbar from "@mui/material/Snackbar";
@@ -252,7 +252,7 @@ export default function SignUp() {
                 id="name"
                 name="name"
                 type="text"
-                placeholder="John Doe"
+                placeholder="Your Name"
                 autoComplete="name"
                 autoFocus
                 required

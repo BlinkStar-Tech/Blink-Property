@@ -22,6 +22,7 @@ import {
   Grid,
   useTheme,
   useMediaQuery,
+  Button
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -35,8 +36,6 @@ import {
   Search as SearchIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import { useAuth } from '../../context/AuthContext';
-import PropertyCard from './PropertyCard';
 
 const drawerWidth = 240;
 
@@ -56,7 +55,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
       }),
       marginLeft: drawerWidth,
     }),
-  }),
+  })
 );
 
 const StyledAppBar = styled(AppBar, { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -73,7 +72,7 @@ const StyledAppBar = styled(AppBar, { shouldForwardProp: (prop) => prop !== 'ope
         duration: theme.transitions.duration.enteringScreen,
       }),
     }),
-  }),
+  })
 );
 
 const StatsCard = styled(Card)(({ theme }) => ({
@@ -157,7 +156,6 @@ const sampleProperties = [
 export default function Dashboard() {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { user, logout } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
@@ -176,7 +174,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     handleProfileMenuClose();
-    logout();
+    // Add logout logic here
   };
 
   const handleMenuItemClick = (path) => {
@@ -240,7 +238,7 @@ export default function Dashboard() {
               sx={{ ml: 2 }}
             >
               <Avatar sx={{ width: 32, height: 32 }}>
-                {user?.name?.[0] || 'U'}
+                U
               </Avatar>
             </IconButton>
           </Box>
@@ -268,7 +266,7 @@ export default function Dashboard() {
         <Toolbar /> {/* Spacing for AppBar */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" sx={{ mb: 2 }}>
-            Welcome back, {user?.name || 'User'}!
+            Welcome back, User!
           </Typography>
           <Grid container spacing={3}>
             {statsData.map((stat) => (
@@ -299,7 +297,13 @@ export default function Dashboard() {
           <Grid container spacing={3}>
             {sampleProperties.map((property) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={property.id}>
-                <PropertyCard property={property} />
+                <Card>
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight={600}>{property.title}</Typography>
+                    <Typography variant="body2" color="text.secondary">{property.location}</Typography>
+                    <Typography variant="body2">${property.price}</Typography>
+                  </CardContent>
+                </Card>
               </Grid>
             ))}
           </Grid>

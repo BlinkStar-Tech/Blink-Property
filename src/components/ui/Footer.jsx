@@ -90,7 +90,7 @@ const Footer = () => {
                 Connect With Us
               </Typography>
               <Box sx={{ display: 'flex', gap: 2, justifyContent: { xs: 'center', md: 'flex-start' } }}>
-                <SocialButton href="https://www.facebook.com" target="_blank" aria-label="Facebook">
+                <SocialButton href="https://www.facebook.com/profile.php?id=61559780460174" target="_blank" aria-label="Facebook">
                   <Facebook />
                 </SocialButton>
                 <SocialButton href="https://www.twitter.com" target="_blank" aria-label="Twitter">

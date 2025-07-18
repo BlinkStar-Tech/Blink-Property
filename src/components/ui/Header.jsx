@@ -1,104 +1,132 @@
 import React, { useState } from 'react';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  IconButton,
-  Tooltip,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  useTheme,
-  useMediaQuery,
-} from '@mui/material';
-import { Link } from 'react-router-dom';
-import { AccountCircle, Menu } from '@mui/icons-material';
+import { AppBar, Toolbar, Typography, Button, Box, IconButton, Avatar, Menu, MenuItem, Tooltip, Drawer, List, ListItem, ListItemText, useMediaQuery } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
-const NavigationBar = () => {
+const navLinks = [
+  { label: 'Home', path: '/' },
+  { label: 'Properties', path: '/properties' },
+  { label: 'About', path: '/about' },
+  { label: 'Contact', path: '/contact' },
+];
+
+const Header = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const toggleDrawer = (open) => () => {
-    setDrawerOpen(open);
+  const handleAvatarClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+  const handleProfile = () => {
+    handleMenuClose();
+    navigate('/profile');
+  };
+  const handleLogout = () => {
+    handleMenuClose();
+    logout();
+  };
+  const handleDashboard = () => {
+    handleMenuClose();
+    navigate('/dashboard');
+  };
+  const handleNav = (path) => {
+    setDrawerOpen(false);
+    navigate(path);
   };
 
-  const menuItems = [
-    { text: 'Home', path: '/' },
-    { text: 'About', path: '/about' },
-    { text: 'Properties', path: '/properties' },
-    { text: 'Contact', path: '/contact' },
-  ];
-
   return (
-    <AppBar
-      position="static"
-      sx={{
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        backgroundColor: 'black',
-      }}
-    >
-      <Toolbar>
-        <Typography
-          variant="h6"
-          component={Link}
-          to="/"
-          sx={{
-            flexGrow: 1,
-            color: '#f8f9fa',
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
-            textDecoration: 'none',
-          }}
-        >
-          BlinkStar Properties
-        </Typography>
-        
+    <AppBar position="static" color="default" elevation={1}>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <Typography variant="h5" fontWeight={700} sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>BlinkStar Properties</Typography>
         {isMobile ? (
           <>
-            <IconButton edge="end" color="inherit" onClick={toggleDrawer(true)}>
-              <Menu />
+            <IconButton edge="end" color="inherit" onClick={() => setDrawerOpen(true)}>
+              <MenuIcon />
             </IconButton>
-            <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
-              <List>
-                {menuItems.map((item) => (
-                  <ListItem button component={Link} to={item.path} key={item.text}>
-                    <ListItemText primary={item.text} />
-                  </ListItem>
-                ))}
-                <ListItem button component={Link} to="/signin">
-                  <ListItemText primary="Login" />
-                  <IconButton color="inherit">
-                    <AccountCircle />
-                  </IconButton>
-                </ListItem>
-              </List>
+            <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+              <Box sx={{ width: 220, p: 2 }}>
+                <List>
+                  {navLinks.map(link => (
+                    <ListItem button key={link.label} onClick={() => handleNav(link.path)}>
+                      <ListItemText primary={link.label} />
+                    </ListItem>
+                  ))}
+                  {!user ? (
+                    <>
+                      <ListItem button onClick={() => handleNav('/signin')}><ListItemText primary="Sign In" /></ListItem>
+                      <ListItem button onClick={() => handleNav('/signup')}><ListItemText primary="Sign Up" /></ListItem>
+                    </>
+                  ) : (
+                    <>
+                      <ListItem button onClick={handleProfile}><ListItemText primary="Profile" /></ListItem>
+                      <ListItem button onClick={handleLogout}><ListItemText primary="Logout" /></ListItem>
+                    </>
+                  )}
+                </List>
+              </Box>
             </Drawer>
+            {user && (
+              <Tooltip title={user.name || user.email}>
+                <IconButton onClick={handleAvatarClick} size="large" sx={{ ml: 1 }}>
+                  <Avatar>{user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase()}</Avatar>
+                </IconButton>
+              </Tooltip>
+            )}
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem onClick={handleDashboard}>Dashboard</MenuItem>
+              <MenuItem onClick={handleProfile}>Profile</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
           </>
         ) : (
           <>
-            {menuItems.map((item) => (
-              <Button
-                key={item.text}
-                component={Link}
-                to={item.path}
-                color="inherit"
-                sx={{ fontSize: '1.1rem', marginLeft: '15px' }}
-              >
-                {item.text}
-              </Button>
-            ))}
-            <div style={{ marginLeft: '100px' }} />
-            <Button component={Link} to="/add-listing" variant="contained" color="primary" sx={{ marginLeft: '10px' }}>
-              Add Listing
-            </Button>
-            <Tooltip title="Login" arrow>
-              <IconButton component={Link} to="/SignIn" color="inherit" sx={{ marginLeft: '10px' }}>
-                <AccountCircle />
-              </IconButton>
-            </Tooltip>
+            <Box display="flex" alignItems="center" gap={2}>
+              {navLinks.map(link => (
+                <Button key={link.label} color="inherit" onClick={() => navigate(link.path)}>{link.label}</Button>
+              ))}
+            </Box>
+            <Box display="flex" alignItems="center" gap={2}>
+              {!user ? (
+                <>
+                  <Button color="primary" variant="outlined" onClick={() => navigate('/signin')}>Sign In</Button>
+                  <Button color="primary" variant="contained" onClick={() => navigate('/signup')}>Sign Up</Button>
+                </>
+              ) : (
+                <>
+                  <Tooltip title={user.name || user.email}>
+                    <IconButton onClick={handleAvatarClick} size="large" sx={{ ml: 1 }}>
+                      <Avatar>{user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase()}</Avatar>
+                    </IconButton>
+                  </Tooltip>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  >
+                    <MenuItem onClick={handleDashboard}>Dashboard</MenuItem>
+                    <MenuItem onClick={handleProfile}>Profile</MenuItem>
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                  </Menu>
+                </>
+              )}
+            </Box>
           </>
         )}
       </Toolbar>
@@ -106,4 +134,4 @@ const NavigationBar = () => {
   );
 };
 
-export default NavigationBar;
+export default Header;

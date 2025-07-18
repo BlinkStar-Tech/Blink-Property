@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
 Box,
 Typography,
@@ -13,7 +13,6 @@ Stack
 import { Search as SearchIcon, LocationOn } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import bannerimage from '../../img/banner2.jpg';
-
 
 const BannerContainer = styled(Box)(({ theme }) => ({
 position: 'relative',
@@ -62,10 +61,20 @@ const propertyTypes = [
 "Land"
 ];
 
-export default function Banner() {
+export default function Banner({ onSearch }) {
 const [location, setLocation] = useState(null);
 const [propertyType, setPropertyType] = useState(null);
 const [priceRange, setPriceRange] = useState('');
+
+  const handleSearch = () => {
+    if (onSearch) {
+      onSearch({
+        location: location || '',
+        type: propertyType || '',
+        maxPrice: priceRange || ''
+      });
+    }
+  };
 
 return (
 <BannerContainer>
@@ -158,6 +167,7 @@ Discover the perfect property in your favorite location
               px: { xs: 3, md: 4 },
               minWidth: { xs: '100%', md: '140px' },
             }}
+                onClick={handleSearch}
           >
             Search
           </Button>
