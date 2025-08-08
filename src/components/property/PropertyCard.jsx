@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardMedia, Typography, Box, Chip, Stack, IconButton, Tooltip } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import HotelIcon from '@mui/icons-material/Hotel';
 import BathtubIcon from '@mui/icons-material/Bathtub';
@@ -9,7 +10,8 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 const getImageUrl = (img) => {
   if (!img) return '';
   if (img.startsWith('http')) return img;
-  return img.startsWith('/uploads') ? img : `/uploads/${img}`;
+  if (img.startsWith('/uploads')) return img;
+  return `/uploads/${img}`;
 };
 
 const formatPrice = (price) => {
@@ -18,13 +20,38 @@ const formatPrice = (price) => {
 };
 
 const PropertyCard = ({ property, isFavorite, onFavoriteToggle }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (e) => {
+    // Don't navigate if clicking on favorite button
+    if (e.target.closest('button')) {
+      return;
+    }
+    navigate(`/property/${property._id}`);
+  };
+
   return (
-    <Card sx={{ borderRadius: 3, boxShadow: 3, position: 'relative', overflow: 'visible', minHeight: 370 }}>
+    <Card 
+      sx={{ 
+        borderRadius: 3, 
+        boxShadow: 3, 
+        position: 'relative', 
+        overflow: 'visible', 
+        minHeight: 370,
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: 6,
+        }
+      }}
+      onClick={handleCardClick}
+    >
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img"
           height="180"
-          image={getImageUrl(property.images && property.images[0])}
+          image={getImageUrl(property.images?.[0] || property.imageUrl)}
           alt={property.title}
           sx={{ borderTopLeftRadius: 12, borderTopRightRadius: 12, objectFit: 'cover' }}
         />
@@ -40,7 +67,10 @@ const PropertyCard = ({ property, isFavorite, onFavoriteToggle }) => {
           <Tooltip title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
             <IconButton
               aria-label="favorite"
-              onClick={onFavoriteToggle}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFavoriteToggle();
+              }}
               sx={{ position: 'absolute', top: 12, right: 12, color: 'red', zIndex: 2 }}
             >
               {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
@@ -60,11 +90,11 @@ const PropertyCard = ({ property, isFavorite, onFavoriteToggle }) => {
         <Stack direction="row" spacing={2} alignItems="center">
           <Stack direction="row" spacing={0.5} alignItems="center">
             <HotelIcon fontSize="small" />
-            <Typography variant="body2">{property.bedrooms} Beds</Typography>
+            <Typography variant="body2">{property.bedrooms || property.beds} Beds</Typography>
           </Stack>
           <Stack direction="row" spacing={0.5} alignItems="center">
             <BathtubIcon fontSize="small" />
-            <Typography variant="body2">{property.bathrooms} Baths</Typography>
+            <Typography variant="body2">{property.bathrooms || property.baths} Baths</Typography>
           </Stack>
         </Stack>
       </CardContent>

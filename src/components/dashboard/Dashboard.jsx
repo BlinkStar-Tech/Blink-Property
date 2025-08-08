@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -22,7 +22,8 @@ import {
   Grid,
   useTheme,
   useMediaQuery,
-  Button
+  Button,
+  Paper
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -36,6 +37,9 @@ import {
   Search as SearchIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import { useAuth } from '../../context/AuthContext';
+import PropertyCard from '../property/PropertyCard';
+import Loader from '../ui/Loader';
 
 const drawerWidth = 240;
 
@@ -95,70 +99,60 @@ const menuItems = [
   { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
 ];
 
-const statsData = [
-  { title: 'Total Properties', value: '125', color: '#2196f3' },
-  { title: 'Active Listings', value: '45', color: '#4caf50' },
-  { title: 'Total Views', value: '1.2K', color: '#ff9800' },
-  { title: 'New Inquiries', value: '28', color: '#f44336' },
-];
-
-const sampleProperties = [
-  {
-    id: 1,
-    title: 'Modern Apartment with Ocean View',
-    location: 'Miami Beach, FL',
-    price: 750000,
-    status: 'For Sale',
-    beds: 3,
-    baths: 2,
-    parking: 1,
-    image: 'https://source.unsplash.com/random/800x600/?apartment',
-    isFavorite: false,
-  },
-  {
-    id: 2,
-    title: 'Luxury Villa with Pool',
-    location: 'Beverly Hills, CA',
-    price: 2500000,
-    status: 'For Sale',
-    beds: 5,
-    baths: 4,
-    parking: 2,
-    image: 'https://source.unsplash.com/random/800x600/?villa',
-    isFavorite: true,
-  },
-  {
-    id: 3,
-    title: 'Downtown Loft',
-    location: 'New York, NY',
-    price: 1200000,
-    status: 'For Rent',
-    beds: 2,
-    baths: 2,
-    parking: 1,
-    image: 'https://source.unsplash.com/random/800x600/?loft',
-    isFavorite: false,
-  },
-  {
-    id: 4,
-    title: 'Seaside Cottage',
-    location: 'Malibu, CA',
-    price: 950000,
-    status: 'For Sale',
-    beds: 3,
-    baths: 2,
-    parking: 2,
-    image: 'https://source.unsplash.com/random/800x600/?cottage',
-    isFavorite: false,
-  },
-];
-
 export default function Dashboard() {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
+  const [user, setUser] = useState(null);
+  const [properties, setProperties] = useState([]);
+  const [stats, setStats] = useState({
+    totalProperties: 0,
+    activeListings: 0,
+    totalViews: 0,
+    newInquiries: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        
+        // Fetch user profile
+        const userRes = await fetch('/api/users/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const userData = await userRes.json();
+        setUser(userData);
+        
+        // Fetch user's properties
+        const propRes = await fetch(`/api/property/user/${userData._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const propData = await propRes.json();
+        setProperties(propData.properties || []);
+        
+        // Fetch dashboard statistics
+        const statsRes = await fetch(`/api/property/stats/${userData._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const statsData = await statsRes.json();
+        setStats(statsData);
+        
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+      }
+      setLoading(false);
+    };
+    
+    if (authUser) {
+      fetchDashboardData();
+    }
+  }, [authUser]);
 
   const handleDrawerToggle = () => {
     setOpen(!open);
@@ -203,6 +197,13 @@ export default function Dashboard() {
       </List>
     </Box>
   );
+
+  const statsData = [
+    { title: 'Total Properties', value: stats.totalProperties.toString(), color: '#2196f3' },
+    { title: 'Active Listings', value: stats.activeListings.toString(), color: '#4caf50' },
+    { title: 'Total Views', value: stats.totalViews.toLocaleString(), color: '#ff9800' },
+    { title: 'New Inquiries', value: stats.newInquiries.toString(), color: '#f44336' },
+  ];
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -264,50 +265,58 @@ export default function Dashboard() {
 
       <Main open={open}>
         <Toolbar /> {/* Spacing for AppBar */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" sx={{ mb: 2 }}>
-            Welcome back, User!
-          </Typography>
-          <Grid container spacing={3}>
-            {statsData.map((stat) => (
-              <Grid item xs={12} sm={6} md={3} key={stat.title}>
-                <StatsCard>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {stat.title}
-                    </Typography>
-                    <Typography
-                      variant="h3"
-                      sx={{ color: stat.color, fontWeight: 'bold' }}
-                    >
-                      {stat.value}
-                    </Typography>
-                  </CardContent>
-                </StatsCard>
+        {loading ? (
+          <Loader size="large" />
+        ) : (
+          <>
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h4" sx={{ mb: 2 }}>
+                Welcome back, {user?.name || user?.email?.split('@')[0] || 'User'}!
+              </Typography>
+              <Grid container spacing={3}>
+                {statsData.map((stat) => (
+                  <Grid item xs={12} sm={6} md={3} key={stat.title}>
+                    <StatsCard>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          {stat.title}
+                        </Typography>
+                        <Typography
+                          variant="h3"
+                          sx={{ color: stat.color, fontWeight: 'bold' }}
+                        >
+                          {stat.value}
+                        </Typography>
+                      </CardContent>
+                    </StatsCard>
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
-        </Box>
+            </Box>
 
-        {/* Recent Properties Section */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h5" sx={{ mb: 2 }}>
-            Recent Properties
-          </Typography>
-          <Grid container spacing={3}>
-            {sampleProperties.map((property) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={property.id}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight={600}>{property.title}</Typography>
-                    <Typography variant="body2" color="text.secondary">{property.location}</Typography>
-                    <Typography variant="body2">${property.price}</Typography>
-                  </CardContent>
-                </Card>
+            {/* Recent Properties Section */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                Your Properties
+              </Typography>
+              <Grid container spacing={3}>
+                {properties.length === 0 ? (
+                  <Grid item xs={12}>
+                    <Typography sx={{ textAlign: 'center', color: '#999' }}>
+                      No properties listed yet.
+                    </Typography>
+                  </Grid>
+                ) : (
+                  properties.map((property) => (
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={property._id}>
+                      <PropertyCard property={property} />
+                    </Grid>
+                  ))
+                )}
               </Grid>
-            ))}
-          </Grid>
-        </Box>
+            </Box>
+          </>
+        )}
       </Main>
 
       <Menu

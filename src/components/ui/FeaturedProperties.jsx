@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -7,64 +7,85 @@ import {
   Button,
 } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
-import PropertyCard from '../dashboard/PropertyCard';
-import banner from '../../img/banner.jpg';
-import banner2 from '../../img/banner2.jpg';
-import house1 from '../../img/house1.jpg';
-import accommoo from '../../img/accommo.jpg';
-
-const featuredProperties = [
-  {
-    id: 1,
-    title: 'Modern House',
-    location: 'Chisipete, Harare',
-    price: 4500000,
-    status: 'For Sale',
-    beds: 5,
-    baths: 6,
-    parking: 3,
-    imageUrl: house1,
-    isFavorite: false,
-  },
-  {
-    id: 2,
-    title: 'Luxury Waterfall Villa',
-    location: 'Victoria Falls',
-    price: 2100000,
-    status: 'For Sale',
-    beds: 3,
-    baths: 2,
-    parking: 1,
-    imageUrl: banner,
-    isFavorite: false,
-  },
-  {
-    id: 3,
-    title: 'Mountain View Retreat',
-    location: 'Borrowdale, Harare',
-    price: 3200000,
-    status: 'Accommodation',
-    beds: 4,
-    baths: 3,
-    parking: 2,
-    imageUrl: accommoo,
-    isFavorite: false,
-  },
-  {
-    id: 4,
-    title: 'Cozy Family Home',
-    location: 'Aspindale Park, Harare',
-    price: 250000,
-    status: 'For Sale',
-    beds: 4,
-    baths: 3,
-    parking: 2,
-    imageUrl: banner2,
-    isFavorite: false,
-  },
-];
+import PropertyCard from '../property/PropertyCard';
+import Loader from './Loader';
 
 export default function FeaturedProperties() {
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchRecentProperties = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/property?limit=8&sort=createdAt');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch properties');
+        }
+        
+        const data = await response.json();
+        setProperties(data);
+      } catch (err) {
+        console.error('Error fetching recent properties:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecentProperties();
+  }, []);
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '/placeholder-property.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `http://localhost:5000${imagePath}`;
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  if (loading) {
+    return (
+      <Box 
+        sx={{ 
+          py: { xs: 4, sm: 6, md: 8 }, 
+          backgroundColor: 'background.default',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '300px'
+        }}
+      >
+        <Loader size="large" />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box 
+        sx={{ 
+          py: { xs: 4, sm: 6, md: 8 }, 
+          backgroundColor: 'background.default',
+          textAlign: 'center'
+        }}
+      >
+        <Typography color="error" variant="h6">
+          Error loading properties: {error}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box 
       sx={{ 
@@ -98,7 +119,7 @@ export default function FeaturedProperties() {
               fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
             }}
           >
-            Featured Properties
+            Recent Properties
           </Typography>
           <Typography
             variant="h6"
@@ -109,40 +130,58 @@ export default function FeaturedProperties() {
               px: { xs: 2, sm: 0 }
             }}
           >
-            Discover our hand-picked selection of premium properties
+            Discover our latest property listings
           </Typography>
         </Box>
 
-        <Grid 
-          container 
-          spacing={{ xs: 2, sm: 3, md: 4 }}
-          justifyContent="center"
-          alignItems="stretch"
-        >
-          {featuredProperties.map((property) => (
-            <Grid 
-              item 
-              xs={12} 
-              sm={6} 
-              md={4} 
-              lg={3} 
-              key={property.id}
-              sx={{
-                display: 'flex',
-                justifyContent: 'center'
-              }}
-            >
-              <Box 
-                sx={{ 
-                  width: '100%',
-                  maxWidth: { xs: '400px', sm: '100%' }
+        {properties.length === 0 ? (
+          <Box 
+            sx={{ 
+              textAlign: 'center',
+              py: 8
+            }}
+          >
+            <Typography variant="h6" color="text.secondary">
+              No properties available at the moment
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Check back soon for new listings
+            </Typography>
+          </Box>
+        ) : (
+          <Grid 
+            container 
+            spacing={{ xs: 2, sm: 3, md: 4 }}
+            justifyContent="center"
+            alignItems="stretch"
+          >
+            {properties.slice(0, 8).map((property) => (
+              <Grid 
+                item 
+                xs={12} 
+                sm={6} 
+                md={4} 
+                lg={3} 
+                key={property._id}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center'
                 }}
               >
-                <PropertyCard property={property} />
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+                <Box 
+                  sx={{ 
+                    width: '100%',
+                    maxWidth: { xs: '400px', sm: '100%' }
+                  }}
+                >
+                  <PropertyCard 
+                    property={property}
+                  />
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        )}
 
         <Box 
           sx={{ 

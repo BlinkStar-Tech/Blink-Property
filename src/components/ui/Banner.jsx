@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 Box,
 Typography,
@@ -8,25 +8,35 @@ Button,
 InputAdornment,
 Paper,
 Autocomplete,
-Stack
+  Stack,
+  IconButton
 } from '@mui/material';
-import { Search as SearchIcon, LocationOn } from '@mui/icons-material';
+import { Search as SearchIcon, LocationOn, NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import bannerimage from '../../img/banner2.jpg';
+import banner1 from '../../img/banner1.jpg';
+import banner2 from '../../img/banner2.jpg';
+import banner3 from '../../img/banner3.jpg';
 
 const BannerContainer = styled(Box)(({ theme }) => ({
 position: 'relative',
 height: '95vh',
 display: 'flex',
 alignItems: 'center',
-backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${bannerimage})`,
-backgroundSize: 'cover',
-backgroundPosition: 'center',
+  overflow: 'hidden',
 color: 'white',
 [theme.breakpoints.down('sm')]: {
 height: '80vh',
 },
 }));
+
+const Slide = styled(Box)({
+  position: 'absolute',
+  width: '100%',
+  height: '100%',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  transition: 'opacity 1s ease-in-out',
+});
 
 const SearchContainer = styled(Paper)(({ theme }) => ({
 padding: theme.spacing(4),
@@ -37,6 +47,8 @@ maxWidth: '1000px',
 width: '90%',
 margin: '0 auto',
 marginTop: theme.spacing(4),
+  position: 'relative',
+  zIndex: 2,
 [theme.breakpoints.down('sm')]: {
 padding: theme.spacing(2.5),
 width: '88%',
@@ -61,10 +73,24 @@ const propertyTypes = [
 "Land"
 ];
 
+const banners = [
+  { image: banner1, title: "Find Your Dream Home", subtitle: "Discover luxury living at its finest" },
+  { image: banner2, title: "Modern Living Spaces", subtitle: "Contemporary designs for modern lifestyles" },
+  { image: banner3, title: "Investment Opportunities", subtitle: "Grow your portfolio with prime properties" }
+];
+
 export default function Banner({ onSearch }) {
 const [location, setLocation] = useState(null);
 const [propertyType, setPropertyType] = useState(null);
 const [priceRange, setPriceRange] = useState('');
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSearch = () => {
     if (onSearch) {
@@ -76,9 +102,60 @@ const [priceRange, setPriceRange] = useState('');
     }
   };
 
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % banners.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
+  };
+
 return (
 <BannerContainer>
-<Container maxWidth="lg">
+      {banners.map((banner, index) => (
+        <Slide
+          key={index}
+          sx={{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${banner.image})`,
+            opacity: index === currentSlide ? 1 : 0,
+            zIndex: index === currentSlide ? 1 : 0
+          }}
+        />
+      ))}
+
+      <IconButton
+        onClick={prevSlide}
+        sx={{
+          position: 'absolute',
+          left: 20,
+          zIndex: 3,
+          color: 'white',
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }}
+      >
+        <NavigateBefore fontSize="large" />
+      </IconButton>
+
+      <IconButton
+        onClick={nextSlide}
+        sx={{
+          position: 'absolute',
+          right: 20,
+          zIndex: 3,
+          color: 'white',
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }}
+      >
+        <NavigateNext fontSize="large" />
+      </IconButton>
+
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
 <Box textAlign="center" mb={6}>
 <Typography
 variant="h2"
@@ -87,9 +164,10 @@ sx={{
 fontWeight: 700,
 mb: 3,
 fontSize: { xs: '2.2rem', sm: '2.8rem', md: '3.2rem' },
+              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)'
 }}
 >
-Find Your Dream Home
+            {banners[currentSlide].title}
 </Typography>
 <Typography
 variant="h5"
@@ -97,11 +175,13 @@ sx={{
 mb: 5,
 fontSize: { xs: '1.1rem', sm: '1.3rem', md: '1.5rem' },
 fontWeight: 400,
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
 }}
 >
-Discover the perfect property in your favorite location
+            {banners[currentSlide].subtitle}
 </Typography>
 </Box>
+
     <SearchContainer elevation={4}>
       <Stack spacing={3}>
         <Box

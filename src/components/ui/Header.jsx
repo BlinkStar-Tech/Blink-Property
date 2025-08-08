@@ -54,12 +54,12 @@ const Header = () => {
             </IconButton>
             <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
               <Box sx={{ width: 220, p: 2 }}>
-                <List>
+              <List>
                   {navLinks.map(link => (
                     <ListItem button key={link.label} onClick={() => handleNav(link.path)}>
                       <ListItemText primary={link.label} />
-                    </ListItem>
-                  ))}
+                  </ListItem>
+                ))}
                   {!user ? (
                     <>
                       <ListItem button onClick={() => handleNav('/signin')}><ListItemText primary="Sign In" /></ListItem>
@@ -71,7 +71,7 @@ const Header = () => {
                       <ListItem button onClick={handleLogout}><ListItemText primary="Logout" /></ListItem>
                     </>
                   )}
-                </List>
+              </List>
               </Box>
             </Drawer>
             {user && (
@@ -111,8 +111,8 @@ const Header = () => {
                   <Tooltip title={user.name || user.email}>
                     <IconButton onClick={handleAvatarClick} size="large" sx={{ ml: 1 }}>
                       <Avatar>{user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase()}</Avatar>
-                    </IconButton>
-                  </Tooltip>
+              </IconButton>
+            </Tooltip>
                   <Menu
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}

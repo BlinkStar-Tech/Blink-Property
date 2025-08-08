@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Grid, CircularProgress, Box, Typography } from "@mui/material";
+import { Grid, Box, Typography } from "@mui/material";
 import { useAuth } from '../../context/AuthContext';
 import PropertyCard from './PropertyCard';
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
+import Loader from '../ui/Loader';
 
 const PropertyList = ({ filters = {} }) => {
   const [properties, setProperties] = useState([]);
@@ -55,7 +56,13 @@ const PropertyList = ({ filters = {} }) => {
     return matchesSearch && matchesType && matchesMinPrice && matchesMaxPrice && matchesLocation;
   });
 
-  if (loading) return <CircularProgress />;
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" py={8}>
+        <Loader size="large" />
+      </Box>
+    );
+  }
 
   if (filtered.length === 0) {
     return (
